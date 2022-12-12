@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  Prefix:
+    Type: String
+
+  BucketName:
+    Type: String
+
+Resources:
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Event: s3:ObjectCreated:*
+            Topic: !Ref Topic
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    DependsOn:
+      - TopicPolicy
+
+  Topic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${Prefix}-topic-3e675111-4374-4b15-a631-5ad17ae8dd34"
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+
+  TopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: S3 publish policy
+            Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action:
+              - SNS:Publish
+            Resource:
+              !Ref Topic
+            Condition:
+              ArnLike:
+                aws:SourceArn: !Sub "arn:aws:s3:*:*:${BucketName}"
+      Topics:
+        - !Ref Topic
