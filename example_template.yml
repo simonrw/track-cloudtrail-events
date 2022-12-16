@@ -15,10 +15,44 @@ Resources:
         TopicConfigurations:
           - Event: s3:ObjectCreated:*
             Topic: !Ref Topic
-    DeletionPolicy: Delete
-    UpdateReplacePolicy: Delete
+      AccelerateConfiguration:
+        AccelerationStatus: "Enabled"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - BucketKeyEnabled: true
+            ServerSideEncryptionByDefault:
+              KMSMasterKeyID: !Ref KMSKey
+              SSEAlgorithm: aws:kms
     DependsOn:
       - TopicPolicy
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+
+  KMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      KeyPolicy:
+        Version: 2012-10-17
+        Id: key-default
+        Statement:
+          - Sid: Allow S3 encryption
+            Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action:
+              - "kms:*"
+            Resource: !Sub "arn:aws:s3:*:*:${BucketName}"
+          - Sid: Allow administration of the key
+            Effect: Allow
+            Principal:
+              AWS:
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:user/localstack-testing'
+            Action:
+              - "kms:*"
+            Resource: '*'
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
 
   Topic:
     Type: AWS::SNS::Topic
