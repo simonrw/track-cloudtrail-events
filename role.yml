@@ -17,11 +17,7 @@ Resources:
             Action:
               - sts:AssumeRole
       ManagedPolicyArns:
-        # TODO: lock these down!
-        - arn:aws:iam::aws:policy/IAMFullAccess
-        - arn:aws:iam::aws:policy/AmazonS3FullAccess
-        - arn:aws:iam::aws:policy/AmazonSNSFullAccess
-        - arn:aws:iam::aws:policy/AWSCloudFormationFullAccess
+        - arn:aws:iam::aws:policy/PowerUserAccess
 
 Outputs:
   RoleArn:
