@@ -10,7 +10,7 @@ import argparse
 import dataclasses
 import datetime
 import json
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 import boto3
 import dateutil.parser
@@ -33,6 +33,13 @@ class Event:
     event_name: str
     request_parameters: dict
     event_time: datetime
+    source: str
+    invoker: Optional[str]
+    response_elements: Any
+    request_id: Optional[str]
+    event_id: Optional[str]
+    event_type: Optional[str]
+    event_category: Optional[str]
 
     @classmethod
     def from_raw(cls, raw_event: dict) -> Event:
@@ -40,6 +47,13 @@ class Event:
             event_name=raw_event["eventName"],
             request_parameters=raw_event["requestParameters"],
             event_time=dateutil.parser.parse(raw_event["eventTime"]),
+            source=raw_event["eventSource"],
+            invoker=raw_event.get("userIdentity", {}).get("invokedBy"),
+            response_elements=raw_event.get("responseElements"),
+            request_id=raw_event.get("requestID"),
+            event_id=raw_event.get("eventID"),
+            event_type=raw_event.get("eventType"),
+            event_category=raw_event.get("eventCategory"),
         )
 
 
