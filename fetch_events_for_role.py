@@ -29,10 +29,15 @@ class PrintEncoder(json.JSONEncoder):
 
 
 @dataclasses.dataclass
+class Error:
+    code: Optional[str]
+    message: Optional[str]
+
+@dataclasses.dataclass
 class Event:
     event_name: str
     request_parameters: dict
-    event_time: datetime
+    event_time: datetime.datetime
     source: str
     invoker: Optional[str]
     response_elements: Any
@@ -40,9 +45,15 @@ class Event:
     event_id: Optional[str]
     event_type: Optional[str]
     event_category: Optional[str]
+    error: Optional[Error]
+    read_only: Optional[bool]
 
     @classmethod
     def from_raw(cls, raw_event: dict) -> Event:
+        error = None
+        if raw_event.get("errorCode"):
+            error = Error(code=raw_event.get("errorCode"), message=raw_event.get("errorMessage"))
+
         return Event(
             event_name=raw_event["eventName"],
             request_parameters=raw_event["requestParameters"],
@@ -54,6 +65,8 @@ class Event:
             event_id=raw_event.get("eventID"),
             event_type=raw_event.get("eventType"),
             event_category=raw_event.get("eventCategory"),
+            error=error,
+            read_only=raw_event.get("readOnly"),
         )
 
 
