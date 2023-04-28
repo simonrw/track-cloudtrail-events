@@ -29,7 +29,7 @@ def get_client(service: str):
     return client
 
 
-def fetch_events(role_arn: str, start_time: datetime, end_time: datetime) -> List[dict]:
+def fetch_events(role_arn: str, start_time: str, end_time: str) -> List[dict]:
     print(
         f"fetching cloudtrail events for role {role_arn} from {start_time=} to {end_time=}"
     )
@@ -54,7 +54,8 @@ def fetch_events(role_arn: str, start_time: datetime, end_time: datetime) -> Lis
 
     print(f"found {len(results)} events")
 
-    results.sort(key=lambda e: e.event_time)
+    # it's nice to have the events sorted
+    results.sort(key=lambda e: e["eventTime"])
     return results
 
 
